@@ -370,10 +370,10 @@ final class HookServer: @unchecked Sendable {
             return
         }
 
-        let coucouKind = payload["coucou_kind"] as? String ?? ""
+        let payloadKind = payload["coucou_kind"] as? String ?? ""
 
         // statusline payloads are handled separately — no session, no reveal, no sound
-        if coucouKind == "statusline" {
+        if payloadKind == "statusline" {
             Task { @MainActor in self.processStatusLine(payload: payload) }
             sendLine(fd: fd, text: #"{"ok":true}"#)
             close(fd)
@@ -381,7 +381,7 @@ final class HookServer: @unchecked Sendable {
         }
 
         // AskUserQuestion via --ask PreToolUse hook — hold fd open like PermissionRequest
-        if coucouKind == "ask_user_question" {
+        if payloadKind == "ask_user_question" {
             let toolInput = payload["tool_input"] as? [String: Any] ?? [:]
             if let parsed = AskQuestion.parse(toolInput: toolInput) {
                 Task { @MainActor in self.processQuestionRequest(fd: fd, parsed: parsed, payload: payload) }
@@ -1396,7 +1396,7 @@ final class HookServer: @unchecked Sendable {
             return false
         }
         // Track whether any MauMau hook is installed at all
-        var hasCoucouHooks = false
+        var hasMaumauHooks = false
 
         if let permReqHooks = hooks["PermissionRequest"] as? [[String: Any]] {
             for matcher in permReqHooks {
@@ -1404,7 +1404,7 @@ final class HookServer: @unchecked Sendable {
                     for hook in hookList {
                         if let cmd = hook["command"] as? String,
                            cmd.contains("MauMau") || cmd.contains("maumau") {
-                            hasCoucouHooks = true
+                            hasMaumauHooks = true
                             if let timeout = hook["timeout"] as? Int, timeout < 120 { return true }
                         }
                     }
@@ -1413,7 +1413,7 @@ final class HookServer: @unchecked Sendable {
         }
 
         // Check that the AskUserQuestion PreToolUse entry exists
-        if hasCoucouHooks {
+        if hasMaumauHooks {
             let preToolHooks = hooks["PreToolUse"] as? [[String: Any]] ?? []
             let hasAskEntry = preToolHooks.contains { m in
                 (m["matcher"] as? String) == "AskUserQuestion"
@@ -1657,19 +1657,19 @@ final class HookServer: @unchecked Sendable {
         let (data, original) = try buildHooksData(claudeURL: claudeURL)
 
         // Write nb-hook (shell wrapper) + nb-hook.py (Python relay) into ~/.claude/maumau/
-        let coucouDir = claudeURL.appendingPathComponent("maumau")
-        try FileManager.default.createDirectory(at: coucouDir, withIntermediateDirectories: true)
-        let wrapperURL = coucouDir.appendingPathComponent("nb-hook")
+        let maumauDir = claudeURL.appendingPathComponent("maumau")
+        try FileManager.default.createDirectory(at: maumauDir, withIntermediateDirectories: true)
+        let wrapperURL = maumauDir.appendingPathComponent("nb-hook")
         try nbHookShellWrapper.write(to: wrapperURL, atomically: true, encoding: .utf8)
         _ = try? FileManager.default.setAttributes([.posixPermissions: 0o755 as NSNumber], ofItemAtPath: wrapperURL.path)
-        let pyURL = coucouDir.appendingPathComponent("nb-hook.py")
+        let pyURL = maumauDir.appendingPathComponent("nb-hook.py")
         try nbHookPythonAppStore.write(to: pyURL, atomically: true, encoding: .utf8)
         _ = try? FileManager.default.setAttributes([.posixPermissions: 0o755 as NSNumber], ofItemAtPath: pyURL.path)
 
         // Write settings.json (with backup)
         let settingsURL = claudeURL.appendingPathComponent("settings.json")
         try ClaudeSettingsFile.write(data, to: settingsURL, expecting: original)
-        UserDefaults.standard.set(true, forKey: "coucouHooksInstalled")
+        UserDefaults.standard.set(true, forKey: "maumauHooksInstalled")
     }
 
     func uninstallClaudeHooksAppStore(claudeURL: URL) throws {
@@ -1743,14 +1743,14 @@ final class HookServer: @unchecked Sendable {
     static func claudeHooksInstalled() -> Bool {
         #if APPSTORE
         // Sandboxed: can't read ~/.claude directly — check the install flag set on write.
-        return UserDefaults.standard.bool(forKey: "coucouHooksInstalled")
+        return UserDefaults.standard.bool(forKey: "maumauHooksInstalled")
         #else
         let url = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".claude/settings.json")
         guard let data = try? Data(contentsOf: url),
               let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         else { return false }
-        return coucouHooksPresent(inSettings: json)
+        return maumauHooksPresent(inSettings: json)
         #endif
     }
 
@@ -2151,7 +2151,7 @@ final class HookServer: @unchecked Sendable {
 
     static var copilotHooksURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".copilot/hooks/coucou.json")
+            .appendingPathComponent(".copilot/hooks/maumau.json")
     }
 
     /// True when ~/.copilot/hooks/maumau.json already routes Copilot events to MauMau's nb-hook.
@@ -2198,11 +2198,11 @@ final class HookServer: @unchecked Sendable {
         let current = (try? Data(contentsOf: url)) ?? Data()
         guard sha256Hex(current) == fp else {
             throw NSError(domain: "MauMau", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "~/.copilot/hooks/coucou.json changed since preview. Refresh and try again."
+                NSLocalizedDescriptionKey: "~/.copilot/hooks/maumau.json changed since preview. Refresh and try again."
             ])
         }
         if let data = _pendingCopilotData {
-            try writeJSONFile(data, to: url, suffix: "coucou.json")
+            try writeJSONFile(data, to: url, suffix: "maumau.json")
         } else {
             // Uninstall: delete the file entirely
             try FileManager.default.removeItem(at: url)
@@ -2213,10 +2213,10 @@ final class HookServer: @unchecked Sendable {
 
     private func buildCopilotHooksData() throws -> Data {
         var root = try Self.strictReadJSONObject(at: Self.copilotHooksURL,
-                                                  label: "~/.copilot/hooks/coucou.json")
+                                                  label: "~/.copilot/hooks/maumau.json")
         if let raw = root["hooks"], !(raw is [String: Any]) {
             throw NSError(domain: "MauMau", code: 2, userInfo: [
-                NSLocalizedDescriptionKey: "~/.copilot/hooks/coucou.json: \"hooks\" has an unexpected type — MauMau has not touched it."
+                NSLocalizedDescriptionKey: "~/.copilot/hooks/maumau.json: \"hooks\" has an unexpected type — MauMau has not touched it."
             ])
         }
         let base = hookBase()
@@ -2237,7 +2237,7 @@ final class HookServer: @unchecked Sendable {
         for (event, timeout) in events {
             if let raw = hooks[event], !(raw is [[String: Any]]) {
                 throw NSError(domain: "MauMau", code: 2, userInfo: [
-                    NSLocalizedDescriptionKey: "~/.copilot/hooks/coucou.json: \"hooks\"[\"\(event)\"] has an unexpected type — MauMau has not touched it."
+                    NSLocalizedDescriptionKey: "~/.copilot/hooks/maumau.json: \"hooks\"[\"\(event)\"] has an unexpected type — MauMau has not touched it."
                 ])
             }
             var entries = hooks[event] as? [[String: Any]] ?? []
@@ -2253,7 +2253,7 @@ final class HookServer: @unchecked Sendable {
 
     private func withoutCopilotHooks() throws -> Data {
         var root = try Self.strictReadJSONObject(at: Self.copilotHooksURL,
-                                                  label: "~/.copilot/hooks/coucou.json")
+                                                  label: "~/.copilot/hooks/maumau.json")
         if var hooks = root["hooks"] as? [String: Any] {
             for key in hooks.keys {
                 if var entries = hooks[key] as? [[String: Any]] {
@@ -2411,7 +2411,7 @@ final class HookServer: @unchecked Sendable {
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "'", with: "\\'")
         return """
-// Coucou hook plugin for OpenCode — generated by Coucou.app
+// MauMau hook plugin for OpenCode — generated by MauMau.app
 // Forwards every event to the MauMau notch (fire-and-forget, never blocks).
 import { spawn } from 'node:child_process';
 
@@ -2834,7 +2834,7 @@ def register(ctx) -> None:
     ctx.register_hook('post_tool_call',   post_tool_call)
 
     if hasattr(ctx, 'register_approval_transport'):
-        # Hermes version supports transport API — Coucou shows a real Allow/Deny card
+        # Hermes version supports transport API — MauMau shows a real Allow/Deny card
         # and returns the user's choice to Hermes.
         def _present(request) -> object:
             sid = (getattr(request, 'session_id', None)
@@ -2897,7 +2897,7 @@ version: "1.0"
 description: MauMau notch integration — generated by MauMau.app
 """
 
-    /// Merges Coucou keys into a Hermes config.yaml string without touching other settings.
+    /// Merges MauMau keys into a Hermes config.yaml string without touching other settings.
     ///
     /// Returns the merged YAML string, or nil if the file uses an unsupported structure
     /// (flow maps `{…}`, YAML anchors `&`, multi-document `---`) that the line-level
@@ -2995,7 +2995,7 @@ description: MauMau notch integration — generated by MauMau.app
         }
 
         func removeApprovalTransport() {
-            // Only remove exact Coucou-written transport keys; don't touch unrelated keys.
+            // Only remove exact MauMau-written transport keys; don't touch unrelated keys.
             lines.removeAll { line in
                 let t = line.trimmingCharacters(in: .whitespaces)
                 return t == "transport: maumau" || t == "transport_fallback: builtin"
@@ -3006,7 +3006,7 @@ description: MauMau notch integration — generated by MauMau.app
         // Note: actual plugin enable/disable is done via `hermes plugins enable/disable maumau`
         // CLI after writing/removing the plugin files. This block ensures the preview
         // shows the complete intended state of config.yaml.
-        func ensureCoucouPlugin() {
+        func ensureMaumauPlugin() {
             // "Already present" = maumau in the plugins.enabled list specifically.
             // Check by finding plugins: section first, then enabled: sub-key within it.
             if let pluginsIdx = topLevelIndex(key: "plugins") {
@@ -3051,7 +3051,7 @@ description: MauMau notch integration — generated by MauMau.app
             }
         }
 
-        func removeCoucouPlugin() {
+        func removeMaumauPlugin() {
             // Remove the `- maumau` entry from plugins.enabled only.
             // If that leaves enabled: with no entries, leave the key in place (don't remove it).
             guard let pluginsIdx = topLevelIndex(key: "plugins") else { return }
@@ -3070,7 +3070,7 @@ description: MauMau notch integration — generated by MauMau.app
                 let prefix = enabledLine.prefix(while: { $0 == " " })
                 lines[enabledIdx] = "\(prefix)\(cleaned)"
             } else {
-                // Block list: remove the `- coucou` entry
+                // Block list: remove the `- maumau` entry
                 let enabledRange = sectionRange(from: enabledIdx)
                 // Collect indices to remove first, then remove in reverse to preserve indices.
                 let toRemove = (enabledRange.lowerBound + 1 ..< enabledRange.upperBound)
@@ -3079,7 +3079,7 @@ description: MauMau notch integration — generated by MauMau.app
             }
         }
 
-        ensureCoucouPlugin()
+        ensureMaumauPlugin()
         if enableApprovals { ensureApprovalTransport() } else { removeApprovalTransport() }
         return lines.joined(separator: "\n")
     }
@@ -3182,7 +3182,7 @@ description: MauMau notch integration — generated by MauMau.app
         guard let merged = Self.mergedHermesConfig(base, enableApprovals: effectiveApprovals) else {
             _pendingHermesConfigContent = nil
             throw NSError(domain: "MauMau", code: 4, userInfo: [
-                NSLocalizedDescriptionKey: "~/.hermes/config.yaml uses an unsupported structure (flow maps, YAML anchors, or multi-document). Edit it manually and add:\n  security:\n    approval:\n      transport: coucou\n      transport_fallback: builtin"
+                NSLocalizedDescriptionKey: "~/.hermes/config.yaml uses an unsupported structure (flow maps, YAML anchors, or multi-document). Edit it manually and add:\n  security:\n    approval:\n      transport: maumau\n      transport_fallback: builtin"
             ])
         }
         _pendingHermesConfigContent = merged
@@ -3236,7 +3236,7 @@ extension Notification.Name {
 
 private let nbHookShellWrapper = """
 #!/bin/sh
-# Coucou hook relay — always exits 0, never blocks Claude Code
+# MauMau hook relay — always exits 0, never blocks Claude Code
 HOOK_DIR="$(dirname "$0")"
 out=""
 if xcode-select -p >/dev/null 2>&1; then
@@ -3272,8 +3272,8 @@ exit 0
 
 private let nbHookPythonGitHub = """
 #!/usr/bin/env python3
-# nb-hook.py — Coucou hook relay for Claude Code and third-party agents (GitHub version)
-# Reads JSON from stdin, forwards to Coucou via Unix socket, translates response.
+# nb-hook.py — MauMau hook relay for Claude Code and third-party agents (GitHub version)
+# Reads JSON from stdin, forwards to MauMau via Unix socket, translates response.
 import sys, json, os, socket
 
 def normalize_event(name):
@@ -3380,7 +3380,7 @@ def main():
         '~/Library/Application Support/MauMau/nb.sock'
     )
 
-    # --statusline mode: relay rate_limits to Coucou, then delegate to saved previous
+    # --statusline mode: relay rate_limits to MauMau, then delegate to saved previous
     if '--statusline' in sys.argv[1:]:
         relay = {
             'coucou_kind': 'statusline',
@@ -3512,7 +3512,7 @@ def main():
     # socket_path is already defined above
 
     if event == 'PermissionRequest':
-        # Block and wait for Coucou's decision (Claude Code allows up to 120s)
+        # Block and wait for MauMau's decision (Claude Code allows up to 120s)
         try:
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             s.settimeout(118)
@@ -3565,7 +3565,7 @@ def main():
                     if agent in ('copilot', 'muse'):
                         out = {'permissionDecision': 'deny'}
                     else:
-                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from MauMau'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
@@ -3606,7 +3606,7 @@ def main():
         pass  # Always exit cleanly — never block the agent
 
     # Antigravity needs a decision on PreToolUse ({} reads as a denial). "ask" keeps its own
-    # permission prompt (and the user's Always Allow); Coucou never allows a tool by itself.
+    # permission prompt (and the user's Always Allow); MauMau never allows a tool by itself.
     if agent == 'antigravity' and event == 'PreToolUse':
         sys.stdout.write('{"decision":"ask"}\\n')
         sys.stdout.flush()
@@ -3625,7 +3625,7 @@ sys.exit(0)
 
 private let nbHookPythonAppStore = """
 #!/usr/bin/env python3
-# nb-hook.py — Coucou (App Store) hook relay for Claude Code and third-party agents
+# nb-hook.py — MauMau (App Store) hook relay for Claude Code and third-party agents
 # Socket lives inside the sandboxed container; script runs outside the sandbox.
 import sys, json, os, socket
 
@@ -3733,7 +3733,7 @@ def main():
         '~/Library/Containers/com.maumau.app/Data/nb.sock'
     )
 
-    # --statusline mode: relay rate_limits to Coucou, then delegate to saved previous
+    # --statusline mode: relay rate_limits to MauMau, then delegate to saved previous
     if '--statusline' in sys.argv[1:]:
         relay = {
             'coucou_kind': 'statusline',
@@ -3864,7 +3864,7 @@ def main():
     # socket_path is already defined above
 
     if event == 'PermissionRequest':
-        # Block and wait for Coucou's decision (Claude Code allows up to 120s)
+        # Block and wait for MauMau's decision (Claude Code allows up to 120s)
         try:
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             s.settimeout(118)
@@ -3917,7 +3917,7 @@ def main():
                     if agent in ('copilot', 'muse'):
                         out = {'permissionDecision': 'deny'}
                     else:
-                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from MauMau'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
@@ -3957,7 +3957,7 @@ def main():
         pass  # Always exit cleanly — never block the agent
 
     # Antigravity needs a decision on PreToolUse ({} reads as a denial). "ask" keeps its own
-    # permission prompt (and the user's Always Allow); Coucou never allows a tool by itself.
+    # permission prompt (and the user's Always Allow); MauMau never allows a tool by itself.
     if agent == 'antigravity' and event == 'PreToolUse':
         sys.stdout.write('{"decision":"ask"}\\n')
         sys.stdout.flush()

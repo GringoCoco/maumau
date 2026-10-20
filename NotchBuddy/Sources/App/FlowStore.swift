@@ -63,8 +63,8 @@ struct FlowAppStyle: Codable, Hashable, Identifiable, Sendable {
     var id: String { bundleID }
 }
 
-/// Everything the Coucou Flow window shows and edits: the history, the numbers, the dictionary,
-/// the snippets and the styles. Stored as small JSON files in Application Support/NotchBuddy/Flow,
+/// Everything the MauMau Flow window shows and edits: the history, the numbers, the dictionary,
+/// the snippets and the styles. Stored as small JSON files in Application Support/MauMau/Flow,
 /// on this Mac only.
 @MainActor
 final class FlowStore: ObservableObject {
