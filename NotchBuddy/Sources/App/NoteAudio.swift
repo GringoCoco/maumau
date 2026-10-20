@@ -167,7 +167,7 @@ final class SystemAudioTap: @unchecked Sendable {
     private var procID: AudioDeviceIOProcID?
     /// The tap's own buffers, when the aggregate also brings the output device's inputs (a headset's mic).
     private var tapList: UnsafeMutableAudioBufferListPointer?
-    private let queue = DispatchQueue(label: "fr.louisraille.NotchBuddy.notetaker.system", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.maumau.app.notetaker.system", qos: .userInitiated)
 
     func start(sink: @escaping @Sendable ([Float]) -> Void) throws {
         let description = CATapDescription(stereoGlobalTapButExcludeProcesses: [])

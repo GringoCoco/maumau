@@ -22,10 +22,10 @@ final class LiveActivityRelay {
     static let shared = LiveActivityRelay()
 
     static let enabledKey = "iPhoneLiveActivityEnabled"
-    /// Overrides the relay address (defaults write fr.louisraille.NotchBuddy phoneRelayURL <url>).
+    /// Overrides the relay address (defaults write com.maumau.app phoneRelayURL <url>).
     static let relayURLKey = "phoneRelayURL"
     /// The deployed relay (relay/README.md).
-    static let defaultRelayURL = "https://coucou-relay.raillelouis.workers.dev"
+    static let defaultRelayURL = "https://maumau-relay.YOURSUBDOMAIN.workers.dev"
 
     static var isEnabled: Bool { UserDefaults.standard.bool(forKey: enabledKey) }
 

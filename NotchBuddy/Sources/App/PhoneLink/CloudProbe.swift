@@ -11,7 +11,7 @@ import CloudKit
 // Step 1 spike, kept for testing: when the phoneLinkPing default is on, proves
 // that the Mac and the iPhone app share a private CloudKit database:
 // writes a `Ping` every 60 s, waits for the iPhone's `Pong`, and logs the
-// round trip to ~/Library/Logs/NotchBuddy/nb.log. Pongs arrive both through a
+// round trip to ~/Library/Logs/MauMau/nb.log. Pongs arrive both through a
 // silent push (CKDatabaseSubscription) and a 5 s poll, so the log shows which
 // path is faster. Compiled only with PHONE_LINK; normal builds never see it.
 
@@ -19,7 +19,7 @@ import CloudKit
 final class CloudProbe {
     static let shared = CloudProbe()
 
-    static let containerID = "iCloud.fr.louisraille.Coucou"
+    static let containerID = "iCloud.com.maumau.app"
     static let zoneID = CKRecordZone.ID(zoneName: "Coucou", ownerName: CKCurrentUserDefaultName)
     private static let subscriptionID = "coucou-zone-mac"
 
@@ -106,7 +106,7 @@ final class CloudProbe {
         Task { _ = await prepare() }
 
         // Step 1 Ping/Pong test: off unless asked for, so the Mac stays idle at rest
-        // (defaults write fr.louisraille.NotchBuddy phoneLinkPing -bool YES).
+        // (defaults write com.maumau.app phoneLinkPing -bool YES).
         guard UserDefaults.standard.bool(forKey: "phoneLinkPing") else {
             log("ping test off (phoneLinkPing)")
             return

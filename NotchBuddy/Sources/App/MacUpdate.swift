@@ -3,15 +3,15 @@ import Foundation
 // Coucou's own releases on GitHub, for "New version" in the notch (GitHub build only; the App
 // Store updates its own build). Pure Foundation so tests/MacUpdateTests.swift checks the rules:
 // which release is the Mac's, whether it is newer, what to say about it. The Mac's tags are
-// `vX.Y.Z` with a `Coucou.zip`; Windows, Linux and Android have their own prefixed tags.
+// `vX.Y.Z` with a `MauMau.zip`; Windows, Linux and Android have their own prefixed tags.
 
 enum MacUpdate {
-    static let owner = "Louis-CFM"
-    static let repo = "coucou"
+    static let owner = "GringoCoco"
+    static let repo = "maumau"
     static let releasesURL = URL(string: "https://api.github.com/repos/\(owner)/\(repo)/releases?per_page=20")!
-    /// What the downloaded app must be signed as: Coucou's bundle id, Louis's Developer ID team.
-    static let bundleId = "fr.louisraille.NotchBuddy"
-    static let teamId = "256AUJ9555"
+    /// What the downloaded app must be signed as: MauMau's bundle id and team.
+    static let bundleId = "com.maumau.app"
+    static let teamId = "MAUMAU_TEAM_ID"
     static var codeRequirement: String {
         "anchor apple generic and identifier \"\(bundleId)\" and certificate leaf[subject.OU] = \"\(teamId)\""
     }
@@ -33,7 +33,7 @@ enum MacUpdate {
             guard r["draft"] as? Bool != true, r["prerelease"] as? Bool != true,
                   let tag = r["tag_name"] as? String, let version = macVersion(tag),
                   let assets = r["assets"] as? [[String: Any]],
-                  let zip = assets.first(where: { $0["name"] as? String == "Coucou.zip" }),
+                  let zip = assets.first(where: { $0["name"] as? String == "MauMau.zip" }),
                   let s = zip["browser_download_url"] as? String, let url = URL(string: s),
                   let page = (r["html_url"] as? String).flatMap(URL.init(string:)) else { return nil }
             return Release(version: version, tag: tag, zipURL: url, size: (zip["size"] as? Int) ?? 0,

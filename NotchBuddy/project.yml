@@ -1,6 +1,6 @@
-name: NotchBuddy
+name: MauMau
 options:
-  bundleIdPrefix: fr.louisraille
+  bundleIdPrefix: com.maumau
   deploymentTarget:
     macOS: "15.0"
   xcodeVersion: "27.0"
@@ -44,28 +44,28 @@ settings:
       CODE_SIGNING_ALLOWED: YES
       CODE_SIGN_STYLE: Automatic
       CODE_SIGN_IDENTITY: "Apple Development"
-      DEVELOPMENT_TEAM: 256AUJ9555
+      DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
     Release:
       CODE_SIGNING_REQUIRED: YES
       CODE_SIGNING_ALLOWED: YES
       CODE_SIGN_IDENTITY: "Developer ID Application"
-      DEVELOPMENT_TEAM: 256AUJ9555
+      DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
       OTHER_CODE_SIGN_FLAGS: "--timestamp"
       CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
-      CODE_SIGN_ENTITLEMENTS: Resources/Coucou.entitlements
+      CODE_SIGN_ENTITLEMENTS: Resources/MauMau.entitlements
     ReleaseCloud:
       CODE_SIGNING_REQUIRED: YES
       CODE_SIGNING_ALLOWED: YES
       CODE_SIGN_IDENTITY: "Developer ID Application"
-      DEVELOPMENT_TEAM: 256AUJ9555
+      DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
       OTHER_CODE_SIGN_FLAGS: "--timestamp"
       CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
 
 schemes:
-  NotchBuddy:
+  MauMau:
     build:
       targets:
-        NotchBuddy: all
+        MauMau: all
     run:
       config: Debug
     archive:
@@ -78,10 +78,10 @@ schemes:
       config: Debug
     archive:
       config: Release
-  NotchBuddyCloud:
+  MauMauCloud:
     build:
       targets:
-        NotchBuddy: all
+        MauMau: all
     run:
       config: DebugCloud
     archive:
@@ -94,10 +94,10 @@ schemes:
       config: DebugCloud
     archive:
       config: Release
-  CoucouPhone:
+  MauMauPhone:
     build:
       targets:
-        CoucouPhone: all
+        MauMauPhone: all
     run:
       config: Debug
     archive:
@@ -107,14 +107,14 @@ schemes:
   CoucouPhoneProduction:
     build:
       targets:
-        CoucouPhone: all
+        MauMauPhone: all
     run:
       config: DebugCloud
     archive:
       config: Release
 
 targets:
-  NotchBuddy:
+  MauMau:
     type: application
     platform: macOS
     sources:
@@ -134,9 +134,9 @@ targets:
     info:
       path: Resources/Info.plist
       properties:
-        CFBundleName: Coucou
-        CFBundleDisplayName: Coucou
-        CFBundleIdentifier: fr.louisraille.NotchBuddy
+        CFBundleName: MauMau
+        CFBundleDisplayName: MauMau
+        CFBundleIdentifier: com.maumau.app
         CFBundleVersion: "19"
         CFBundleShortVersionString: "0.5.2"
         CFBundlePackageType: APPL
@@ -169,15 +169,15 @@ targets:
           - zh-Hant
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.NotchBuddy
-        PRODUCT_NAME: Coucou
+        PRODUCT_BUNDLE_IDENTIFIER: com.maumau.app
+        PRODUCT_NAME: MauMau
         INFOPLIST_FILE: Resources/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MACOSX_DEPLOYMENT_TARGET: "15.0"
         ENABLE_SANDBOX: NO
       configs:
         DebugCloud:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouCloud.entitlements
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauCloud.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG PHONE_LINK"
           # The build run every day from Xcode: optimized like Release, so Mochi's
           # drawing costs what it costs for users (unoptimized Swift was ~2× the CPU).
@@ -185,13 +185,13 @@ targets:
         # The distributed build carries the iPhone sync (off until the user
         # turns it on in Settings), so it needs iCloud and its Developer ID profile.
         Release:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouReleaseCloud.entitlements
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauReleaseCloud.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: PHONE_LINK
-          PROVISIONING_PROFILE_SPECIFIER: "Coucou Developer ID"
+          PROVISIONING_PROFILE_SPECIFIER: "MauMau Developer ID"
         ReleaseCloud:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouReleaseCloud.entitlements
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauReleaseCloud.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: PHONE_LINK
-          PROVISIONING_PROFILE_SPECIFIER: "Coucou Developer ID"
+          PROVISIONING_PROFILE_SPECIFIER: "MauMau Developer ID"
     dependencies:
       - package: FluidAudio
     postBuildScripts:
@@ -222,9 +222,9 @@ targets:
     info:
       path: Resources/InfoAppStore.plist
       properties:
-        CFBundleName: Coucou
-        CFBundleDisplayName: Coucou
-        CFBundleIdentifier: fr.louisraille.Coucou
+        CFBundleName: MauMau
+        CFBundleDisplayName: MauMau
+        CFBundleIdentifier: com.maumau.app
         CFBundleVersion: "6"
         CFBundleShortVersionString: "1.1"
         CFBundlePackageType: APPL
@@ -252,29 +252,29 @@ targets:
           - zh-Hant
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.Coucou
-        PRODUCT_NAME: Coucou
+        PRODUCT_BUNDLE_IDENTIFIER: com.maumau.app
+        PRODUCT_NAME: MauMau
         INFOPLIST_FILE: Resources/InfoAppStore.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MACOSX_DEPLOYMENT_TARGET: "15.0"
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
-        CODE_SIGN_ENTITLEMENTS: Resources/CoucouAppStore.entitlements
-        DEVELOPMENT_TEAM: 256AUJ9555
+        CODE_SIGN_ENTITLEMENTS: Resources/MauMauAppStore.entitlements
+        DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: APPSTORE
         CODE_SIGNING_ALLOWED: YES
       configs:
         DebugCloud:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouAppStoreCloud.entitlements
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauAppStoreCloud.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "APPSTORE PHONE_LINK"
         # App Store archive: same iCloud entitlements; Xcode switches push to
         # production when exporting for the App Store.
         Release:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouAppStoreCloud.entitlements
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauAppStoreCloud.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "APPSTORE PHONE_LINK"
 
   # iPhone app. Same bundle ID as the Mac App Store build, for universal purchase.
-  CoucouPhone:
+  MauMauPhone:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
@@ -301,9 +301,9 @@ targets:
     info:
       path: Resources/InfoPhone.plist
       properties:
-        CFBundleName: Coucou
-        CFBundleDisplayName: Coucou
-        CFBundleIdentifier: fr.louisraille.Coucou
+        CFBundleName: MauMau
+        CFBundleDisplayName: MauMau
+        CFBundleIdentifier: com.maumau.app
         CFBundleVersion: "3"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: APPL
@@ -329,38 +329,38 @@ targets:
         NSSupportsLiveActivitiesFrequentUpdates: YES
         # coucou://session/<id>: the widgets open a session in the app.
         CFBundleURLTypes:
-          - CFBundleURLName: fr.louisraille.Coucou
+          - CFBundleURLName: com.maumau.app
             CFBundleURLSchemes:
-              - coucou
+              - maumau
         # Which APNs environment the Live Activity tokens belong to (read by the Mac).
-        CoucouAPNsEnvironment: $(COUCOU_APNS_ENV)
+        MauMauAPNsEnvironment: $(MAUMAU_APNS_ENV)
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.Coucou
-        PRODUCT_NAME: Coucou
+        PRODUCT_BUNDLE_IDENTIFIER: com.maumau.app
+        PRODUCT_NAME: MauMau
         INFOPLIST_FILE: Resources/InfoPhone.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Mochi in other colors, picked in Settings (UIApplication.setAlternateIconName).
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-Blue AppIcon-Green AppIcon-Purple AppIcon-Pink AppIcon-Graphite"
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
-        COUCOU_APNS_ENV: production
+        MAUMAU_APNS_ENV: production
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
-        CODE_SIGN_ENTITLEMENTS: Resources/CoucouPhone.entitlements
-        DEVELOPMENT_TEAM: 256AUJ9555
+        CODE_SIGN_ENTITLEMENTS: Resources/MauMauPhone.entitlements
+        DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
         CODE_SIGNING_REQUIRED: YES
         CODE_SIGNING_ALLOWED: YES
         ENABLE_HARDENED_RUNTIME: NO
         OTHER_CODE_SIGN_FLAGS: ""
       configs:
         Debug:
-          COUCOU_APNS_ENV: development
+          MAUMAU_APNS_ENV: development
         DebugCloud:
-          CODE_SIGN_ENTITLEMENTS: Resources/CoucouPhoneProduction.entitlements
-          COUCOU_APNS_ENV: development
+          CODE_SIGN_ENTITLEMENTS: Resources/MauMauPhoneProduction.entitlements
+          MAUMAU_APNS_ENV: development
 
   # Home Screen and Lock Screen widgets (Solo, Team, List, accessories). They
   # read the sessions the iPhone app saves to the shared App Group.
@@ -381,9 +381,9 @@ targets:
     info:
       path: Resources/InfoWidgets.plist
       properties:
-        CFBundleName: CoucouWidgets
-        CFBundleDisplayName: Coucou
-        CFBundleIdentifier: fr.louisraille.Coucou.Widgets
+        CFBundleName: MauMauWidgets
+        CFBundleDisplayName: MauMau
+        CFBundleIdentifier: com.maumau.app.Widgets
         CFBundleVersion: "3"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: XPC!
@@ -391,17 +391,17 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.Coucou.Widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.maumau.app.Widgets
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) WIDGET_EXTENSION"
-        PRODUCT_NAME: CoucouWidgets
+        PRODUCT_NAME: MauMauWidgets
         INFOPLIST_FILE: Resources/InfoWidgets.plist
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
-        CODE_SIGN_ENTITLEMENTS: Resources/CoucouWidgets.entitlements
-        DEVELOPMENT_TEAM: 256AUJ9555
+        CODE_SIGN_ENTITLEMENTS: Resources/MauMauWidgets.entitlements
+        DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
         CODE_SIGNING_REQUIRED: YES
         CODE_SIGNING_ALLOWED: YES
         ENABLE_HARDENED_RUNTIME: NO
@@ -424,9 +424,9 @@ targets:
     info:
       path: Resources/InfoNotificationContent.plist
       properties:
-        CFBundleName: CoucouNotificationContent
-        CFBundleDisplayName: Coucou
-        CFBundleIdentifier: fr.louisraille.Coucou.NotificationContent
+        CFBundleName: MauMauNotificationContent
+        CFBundleDisplayName: MauMau
+        CFBundleIdentifier: com.maumau.app.NotificationContent
         CFBundleVersion: "3"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: XPC!
@@ -434,20 +434,20 @@ targets:
           NSExtensionPointIdentifier: com.apple.usernotifications.content-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationViewController
           NSExtensionAttributes:
-            UNNotificationExtensionCategory: COUCOU_APPROVAL
+            UNNotificationExtensionCategory: MAUMAU_APPROVAL
             UNNotificationExtensionInitialContentSizeRatio: 0.45
             UNNotificationExtensionDefaultContentHidden: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.Coucou.NotificationContent
-        PRODUCT_NAME: CoucouNotificationContent
+        PRODUCT_BUNDLE_IDENTIFIER: com.maumau.app.NotificationContent
+        PRODUCT_NAME: MauMauNotificationContent
         INFOPLIST_FILE: Resources/InfoNotificationContent.plist
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
-        DEVELOPMENT_TEAM: 256AUJ9555
+        DEVELOPMENT_TEAM: MAUMAU_TEAM_ID
         CODE_SIGNING_REQUIRED: YES
         CODE_SIGNING_ALLOWED: YES
         ENABLE_HARDENED_RUNTIME: NO

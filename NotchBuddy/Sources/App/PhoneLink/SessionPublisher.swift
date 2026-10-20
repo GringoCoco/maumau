@@ -18,7 +18,7 @@ import Combine
 final class SessionPublisher {
     static let shared = SessionPublisher()
 
-    private let container = CKContainer(identifier: "iCloud.fr.louisraille.Coucou")
+    private let container = CKContainer(identifier: "iCloud.com.maumau.app")
     private var database: CKDatabase { container.privateCloudDatabase }
     private var cancellable: AnyCancellable?
 

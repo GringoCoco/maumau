@@ -58,6 +58,7 @@ struct PillDefinition {
         case "agent_codex":        return "Codex"
         case "agent_hermes":       return "Hermes"
         case "agent_claude-desktop": return "Claude Desktop"
+        case "agent_opencode":     return "OpenCode"
         default:                   return String(localized: "Agent")
         }
     }
@@ -85,7 +86,7 @@ enum PillCatalog {
         .init(id: "agent_muse",          name: "Muse Code",   color: "#38BDF8",
               category: .agent,     subtitle: String(localized: "Agent"),        source: .agent,  githubOnly: true),
         .init(id: "agent_opencode",      name: "OpenCode",    color: "#4ADE80",
-              category: .agent,     subtitle: String(localized: "Agent"),        source: .agent,  githubOnly: true),
+              category: .agent,     subtitle: String(localized: "Agent"),        source: .agent),
         .init(id: "agent_amp",           name: "Amp",         color: "#F59E0B",
               category: .agent,     subtitle: String(localized: "Agent"),        source: .agent,  githubOnly: true),
         .init(id: "agent_hermes",        name: "Hermes",      color: "#C084FC",
