@@ -4,7 +4,7 @@ import Speech
 
 // MARK: - WakeSpotter
 //
-// Runs a single SFSpeechRecognizer window to detect the "OK Coucou" wake phrase,
+// Runs a single SFSpeechRecognizer window to detect the "OK MauMau" wake phrase,
 // then switches to command mode in the same recognition session so words spoken
 // immediately after the wake phrase are not lost.
 //
@@ -98,7 +98,7 @@ final class WakeSpotter: @unchecked Sendable {
             req.shouldReportPartialResults  = true
             req.requiresOnDeviceRecognition = true
             let extra = startInCommandPhase ? additionalContextualStrings : [String]()
-            req.contextualStrings = ["Coucou", "OK Coucou", "okay Coucou", "hey Coucou"] + extra
+            req.contextualStrings = ["MauMau", "OK MauMau", "okay MauMau", "hey MauMau"] + extra
             preroll.forEach { req.append($0) }
 
             recognizer   = r
@@ -187,7 +187,7 @@ final class WakeSpotter: @unchecked Sendable {
                     let words = WakePhrase.normalise(transcript).split(separator: " ")
                     maxWords = max(maxWords, words.count)
                     if words.contains(where: { w in
-                        ["cou", "kou", "kuku", "cuck", "koukou", "coco"].contains { w.contains($0) }
+                        ["mau", "mow", "maumau", "mowmow"].contains { w.contains($0) }
                     }) { nearWake = true }
                     let r = WakePhrase.split(transcript)
                     if r.matched {

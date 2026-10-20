@@ -14,8 +14,8 @@ enum FlowEngine: String, CaseIterable, Identifiable {
 }
 
 /// Parakeet (speech to text) and the speaker diarizer of the Notetaker: their models, downloaded
-/// once from Hugging Face when the user clicks Download in Coucou Flow → Settings (≈ 650 MB),
-/// kept in Application Support/NotchBuddy/Models, then everything runs on this Mac.
+/// once from Hugging Face when the user clicks Download in MauMau Flow → Settings (≈ 650 MB),
+/// kept in Application Support/MauMau/Models, then everything runs on this Mac.
 @MainActor
 final class Parakeet: ObservableObject {
     static let shared = Parakeet()
@@ -46,7 +46,7 @@ final class Parakeet: ObservableObject {
         #endif
     }
 
-    /// Coucou's own copy of the models (not FluidAudio's shared folder, so removing them never
+    /// MauMau's own copy of the models (not FluidAudio's shared folder, so removing them never
     /// touches another app's).
     nonisolated static var modelsRoot: URL {
         HookServer.supportDir.appendingPathComponent("Models", isDirectory: true)
